@@ -1,5 +1,10 @@
 
-# Variational Autoencoder with linear layers
+
+# Variational Autoencoder with fully connnected layers, 
+
+# Please email me if you have any comments or questions: alotfi@utexas.edu
+
+
 
 import torch
 from torch.autograd import Variable
@@ -99,7 +104,7 @@ def convert_to_display(samples):
 
 use_cuda = torch.cuda.is_available()
 device = 'cuda' if use_cuda else 'cpu'
-max_iter = int(1)
+max_iter = int(3000)
 batch_size = 100
 z_dim = 2
 lr = 0.001
