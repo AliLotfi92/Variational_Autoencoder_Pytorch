@@ -1,4 +1,9 @@
 
+# Vriational Autoencoder with Convoultional layers
+
+# please email me if you have any questions or comments: alotfi@utexas.edu
+
+
 
 import torch
 from torch.autograd import Variable
@@ -18,7 +23,7 @@ import matplotlib.pyplot as plt
 class CNNVAE1(nn.Module):
 
     def __init__(self, z_dim=2):
-        super(CNNAE1, self).__init__()
+        super(CNNVAE1, self).__init__()
         self.z_dim = z_dim
         self.encode = nn.Sequential(
             nn.Conv2d(1, 28, 4, 2, 1),
@@ -97,17 +102,13 @@ def kl_divergence(mu, logvar):
     return kld
 
 
-def compute_kernel(x, y):
-    x_size = x.size(0)
-    y_size = y.size(0)
-    dim = x.size(1)
-    x = x.unsqueeze(1) # (x_size, 1, dim)
-    y = y.unsqueeze(0) # (1, y_size, dim)
-    tiled_x = x.expand(x_size, y_size, dim)
-    tiled_y = y.expand(x_size, y_size, dim)
-    kernel_input = (tiled_x - tiled_y).pow(2).mean(2)/float(dim)
-    return torch.exp(-kernel_input) # (x_size, y_size)
-
+def convert_to_display(samples):
+    cnt, height, width = int(math.floor(math.sqrt(samples.shape[0]))), samples.shape[1], samples.shape[2]
+    samples = np.transpose(samples, axes=[1, 0, 2, 3])
+    samples = np.reshape(samples, [height, cnt, cnt, width])
+    samples = np.transpose(samples, axes=[1, 0, 2, 3])
+    samples = np.reshape(samples, [height*cnt, width*cnt])
+    return samples
 
 use_cuda = torch.cuda.is_available()
 device = 'cuda' if use_cuda else 'cpu'
@@ -124,6 +125,9 @@ gamma = 1
 training_set = datasets.MNIST('./tmp/MNIST', train=True, download=True, transform=transforms.ToTensor())
 data_loader = DataLoader(training_set, batch_size=batch_size, shuffle=True)
 
+test_set = datasets.MNIST('./tmp/MNIST', train=False, download=True, transform=transforms.ToTensor())
+test_loader = DataLoader(test_set, batch_size=500, shuffle=True)
+
 VAE = CNNVAE1().to(device)
 optim = optim.Adam(VAE.parameters(), lr=lr, betas=(beta1, beta2))
 
@@ -139,12 +143,11 @@ for epoch in range(max_iter):
         KL = kl_divergence(mu, logvar)
         loss = vae_recon_loss + KL
         train_loss += loss.item()
-
         optim.zero_grad()
         loss.backward()
         optim.step()
 
-        if batch_idx % 1000 == 0:
+        if batch_idx % 10 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)] \t  Loss: {:.6f} \t Cross Entropy: {:.6f} \t KL Loss: {:.6f}'.format(epoch, batch_idx * len(x_true),
                                                                               len(data_loader.dataset),
                                                                               100. * batch_idx / len(data_loader),
@@ -162,3 +165,20 @@ for epoch in range(max_iter):
         plt.show()
 
     print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(data_loader.dataset)))
+
+
+if z_dim == 2:
+    batch_size_test = 500
+    z_list, label_list = [], []
+
+    for i in range(20):
+        x_test, y_test= iter(test_loader).next()
+        x_test = Variable(x_test, requires_grad=False).to(device)
+        _, _, _, z = VAE(x_test)
+        z_list.append(z.cpu().data.numpy())
+        label_list.append(y_test.numpy())
+
+    z = np.concatenate(z_list, axis=0)
+    label = np.concatenate(label_list)
+    plt.scatter(z[:, 0], z[:, 1], c=label)
+    plt.show()
