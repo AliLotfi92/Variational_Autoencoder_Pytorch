@@ -85,24 +85,6 @@ def kl_divergence(mu, logvar):
     return kld
 
 
-def compute_kernel(x, y):
-    x_size = x.size(0)
-    y_size = y.size(0)
-    dim = x.size(1)
-    x = x.unsqueeze(1) # (x_size, 1, dim)
-    y = y.unsqueeze(0) # (1, y_size, dim)
-    tiled_x = x.expand(x_size, y_size, dim)
-    tiled_y = y.expand(x_size, y_size, dim)
-    kernel_input = (tiled_x - tiled_y).pow(2).mean(2)/float(dim)
-    return torch.exp(-kernel_input) # (x_size, y_size)
-
-def compute_mmd(x, y):
-    x_kernel = compute_kernel(x, x)
-    y_kernel = compute_kernel(y, y)
-    xy_kernel = compute_kernel(x, y)
-    mmd = x_kernel.mean() + y_kernel.mean() - 2*xy_kernel.mean()
-    return mmd
-
 def convert_to_display(samples):
     cnt, height, width = int(math.floor(math.sqrt(samples.shape[0]))), samples.shape[1], samples.shape[2]
     samples = np.transpose(samples, axes=[1, 0, 2, 3])
@@ -137,9 +119,6 @@ for epoch in range(max_iter):
         x_recon, mu, logvar, z = VAE(x_true)
 
         vae_recon_loss = recon_loss(x_recon, x_true)
-        #p_z = Variable(torch.randn(batch_size, z_dim), requires_grad=False)
-        #p_z = p_z.to(device)
-        #mmd = compute_mmd(p_z, z)
         KL = kl_divergence(mu, logvar)
         loss = vae_recon_loss + KL
         train_loss += loss.item()
