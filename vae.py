@@ -1,3 +1,6 @@
+
+# Variational Autoencoder with linear layers
+
 import torch
 from torch.autograd import Variable
 import torch.nn as nn
@@ -96,7 +99,7 @@ def convert_to_display(samples):
 
 use_cuda = torch.cuda.is_available()
 device = 'cuda' if use_cuda else 'cpu'
-max_iter = int(3000)
+max_iter = int(1)
 batch_size = 100
 z_dim = 2
 lr = 0.001
@@ -105,7 +108,10 @@ beta2 = 0.999
 gamma = 1
 
 training_set = datasets.MNIST('./tmp/MNIST', train=True, download=True, transform=transforms.ToTensor())
+test_set = datasets.MNIST('./tmp/MNIST', train=False, download=True, transform=transforms.ToTensor())
+
 data_loader = DataLoader(training_set, batch_size=batch_size, shuffle=True)
+test_loader = DataLoader(test_set, batch_size=500, shuffle=3, num_workers=3)
 
 VAE = VAE1().to(device)
 optim = optim.Adam(VAE.parameters(), lr=lr, betas=(beta1, beta2))
@@ -144,3 +150,19 @@ for epoch in range(max_iter):
             plt.show()
 
     print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(data_loader.dataset)))
+
+if z_dim == 2:
+    batch_size_test = 500
+    z_list, label_list = [], []
+
+    for i in range(20):
+        x_test, y_test= iter(test_loader).next()
+        x_test = Variable(x_test, requires_grad=False).to(device)
+        _, _, _, z = VAE(x_test)
+        z_list.append(z.cpu().data.numpy())
+        label_list.append(y_test.numpy())
+
+    z = np.concatenate(z_list, axis=0)
+    label = np.concatenate(label_list)
+    plt.scatter(z[:, 0], z[:, 1], c=label)
+    plt.show()
