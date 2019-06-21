@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 class VAE1(nn.Module):
 
     def __init__(self, z_dim=2):
-        super(FactorVAE1, self).__init__()
+        super(VAE1, self).__init__()
         self.z_dim = z_dim
         self.encode = nn.Sequential(
             nn.Linear(784, 400),
