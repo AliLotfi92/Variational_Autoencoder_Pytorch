@@ -1,4 +1,4 @@
-# In The Name of Allah
+
 import os
 import math
 import torch
