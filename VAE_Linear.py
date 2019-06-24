@@ -116,7 +116,7 @@ training_set = datasets.MNIST('./tmp/MNIST', train=True, download=True, transfor
 test_set = datasets.MNIST('./tmp/MNIST', train=False, download=True, transform=transforms.ToTensor())
 
 data_loader = DataLoader(training_set, batch_size=batch_size, shuffle=True)
-test_loader = DataLoader(test_set, batch_size=500, shuffle=3, num_workers=3)
+test_loader = DataLoader(test_set, batch_size=500, shuffle=True, num_workers=3)
 
 VAE = VAE1().to(device)
 optim = optim.Adam(VAE.parameters(), lr=lr, betas=(beta1, beta2))
