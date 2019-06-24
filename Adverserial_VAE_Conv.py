@@ -1,4 +1,4 @@
-# In The Name of Allah
+
 import os
 import math
 import torch
@@ -227,5 +227,3 @@ for epoch in range(max_iter):
         label = np.concatenate(label_list)
         plt.scatter(z[:, 0], z[:, 1], c=label)
         plt.show()
-
-    print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(data_loader.dataset)))
