@@ -170,7 +170,7 @@ for epoch in range(max_iter):
 
     for batch_idx, (x_true, _) in enumerate(data_loader):
 
-        x_true1 = x_true.to(device)
+        x_true = x_true.to(device)
 
         x_recon, mu, logvar, z = VAE(x_true)
 
@@ -196,7 +196,7 @@ for epoch in range(max_iter):
         optim_D.step()
 
         if batch_idx % 100 == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)] \t  Loss: {:.6f} \t Discriminator Loss: {:.6f} \t Generator Loss: {:.6f}'.format(epoch, batch_idx * len(x_true1),
+            print('Train Epoch: {} [{}/{} ({:.0f}%)] \t  Loss: {:.6f} \t Discriminator Loss: {:.6f} \t Generator Loss: {:.6f}'.format(epoch, batch_idx * len(x_true),
                                                                                len(data_loader.dataset),
                                                                                100. * batch_idx / len(data_loader),
                                                                                vae_loss.item(),
