@@ -179,3 +179,5 @@ if z_dim == 2:
     plt.show()
     plt.scatter(z[:, 0], z[:, 1], c=label)
     plt.show()
+
+torch.save(VAE.state_dict(), './saved_models')
