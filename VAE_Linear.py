@@ -18,7 +18,10 @@ import os
 import torch.nn.functional as F
 import torch.nn.init as init
 import matplotlib.pyplot as plt
+import seaborn as sns
+import warnings
 
+warnings.filterwarnings('ignore')
 
 
 class VAE1(nn.Module):
@@ -169,5 +172,7 @@ if z_dim == 2:
 
     z = np.concatenate(z_list, axis=0)
     label = np.concatenate(label_list)
+    sns.kdeplot(z[:, 0], z[:, 1], n_levels=30, cmap='Purples_d')
+    plt.show()
     plt.scatter(z[:, 0], z[:, 1], c=label)
     plt.show()
