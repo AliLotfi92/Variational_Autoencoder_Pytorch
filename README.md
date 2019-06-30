@@ -3,4 +3,6 @@ Implementation of VAE using Pytorch. To make it easier for readers I will add so
 
 
 Adverserial Auto encoder is also added
+
+
 Beta Variational Autoencoder is also added
