@@ -5,7 +5,6 @@
 # Please email me if you have any comments or questions: alotfi@utexas.edu
 
 
-
 import torch
 from torch.autograd import Variable
 import torch.nn as nn
@@ -22,7 +21,7 @@ import seaborn as sns
 import warnings
 
 # Calling Seaborn causes pytorch warnings to be repeated in each loop, so I turned off these redudant warnings, but make sure
-# you do not miss somethings. 
+# you do not miss something important.
 
 warnings.filterwarnings('ignore')
 
@@ -110,7 +109,9 @@ def convert_to_display(samples):
 
 use_cuda = torch.cuda.is_available()
 device = 'cuda' if use_cuda else 'cpu'
-max_iter = int(3000)
+print('The code is running over', device)
+
+max_iter = int(1)
 batch_size = 100
 z_dim = 2
 lr = 0.001
@@ -180,4 +181,5 @@ if z_dim == 2:
     plt.scatter(z[:, 0], z[:, 1], c=label)
     plt.show()
 
-torch.save(VAE.state_dict(), './saved_models')
+torch.save(VAE.state_dict(), './Saved_Networks/Plain_VAE_Linear')
+print('The net\'s parameters are saved')
