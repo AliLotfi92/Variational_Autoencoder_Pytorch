@@ -4,7 +4,6 @@
 
 # Please email me if you have any comments or questions: alotfi@utexas.edu
 
-
 import torch
 from torch.autograd import Variable
 import torch.nn as nn
@@ -19,6 +18,7 @@ import torch.nn.init as init
 import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
+import pickle
 
 # Calling Seaborn causes pytorch warnings to be repeated in each loop, so I turned off these redudant warnings, but make sure
 # you do not miss something important.
@@ -32,18 +32,26 @@ class VAE1(nn.Module):
         super(VAE1, self).__init__()
         self.z_dim = z_dim
         self.encode = nn.Sequential(
-            nn.Linear(784, 400),
+            nn.Linear(784, 1000),
             nn.LeakyReLU(0.2, True),
-            nn.Linear(400, 400),
+            nn.Linear(1000, 2000),
             nn.LeakyReLU(0.2, True),
-            nn.Linear(400, 2 * z_dim),
+            nn.Linear(2000, 2000),
+            nn.LeakyReLU(0.2, True),
+            nn.Linear(2000, 1000),
+            nn.LeakyReLU(0.2, True),
+            nn.Linear(1000, 2 * z_dim),
         )
         self.decode = nn.Sequential(
-            nn.Linear(z_dim, 400),
+            nn.Linear(z_dim, 1000),
             nn.LeakyReLU(0.2, True),
-            nn.Linear(400, 400),
+            nn.Linear(1000, 2000),
             nn.LeakyReLU(0.2, True),
-            nn.Linear(400, 784),
+            nn.Linear(2000, 2000),
+            nn.LeakyReLU(0.2, True),
+            nn.Linear(2000, 1000),
+            nn.LeakyReLU(0.2, True),
+            nn.Linear(1000, 784),
             nn.Sigmoid(),
         )
         self.weight_init()
@@ -128,9 +136,13 @@ test_loader = DataLoader(test_set, batch_size=500, shuffle=True, num_workers=3)
 VAE = VAE1().to(device)
 optim = optim.Adam(VAE.parameters(), lr=lr, betas=(beta1, beta2))
 
+Result = []
 
 for epoch in range(max_iter):
+
     train_loss = 0
+    KL_loss = 0
+    Loglikehood_loss= 0
 
     for batch_idx, (x_true, _) in enumerate(data_loader):
         x_true = x_true.to(device)
@@ -139,7 +151,11 @@ for epoch in range(max_iter):
         vae_recon_loss = recon_loss(x_recon, x_true)
         KL = kl_divergence(mu, logvar)
         loss = vae_recon_loss + KL
+
         train_loss += loss.item()
+        Loglikehood_loss += vae_recon_loss.item()
+        KL_loss += KL.item()
+
 
         optim.zero_grad()
         loss.backward()
@@ -153,15 +169,22 @@ for epoch in range(max_iter):
                                                                               vae_recon_loss,
                                                                               KL))
 
+    print('====> Epoch: {}, \t Average loss: {:.4f}, \t Log Likeihood: {:.4f}, \t KL: {:.4f} '
+          .format(epoch, train_loss / (batch_idx + 1), Loglikehood_loss/ (batch_idx + 1), KL_loss/ (batch_idx + 1)))
 
-        if batch_idx % 1000 == 0:
 
-            samples = VAE(x_true, no_enc=True)
-            samples = samples.permute(0, 2, 3, 1).contiguous().cpu().data.numpy()
-            plt.imshow(convert_to_display(samples), cmap='Greys_r')
-            plt.show()
+    Result.append(('====>epoch:', epoch,
+                   'loss:', train_loss / (batch_idx + 1),
+                   'Loglikeihood:', Loglikehood_loss / (batch_idx + 1),
+                   'KL:', KL_loss / (batch_idx + 1),
+                   ))
 
-    print('====> Epoch: {} Average loss: {:.4f}'.format(epoch, train_loss / len(data_loader.dataset)))
+    with open("file.txt", "w") as output:
+        output.write(str(Result))
+
+
+torch.save(VAE.state_dict(), './Saved_Networks/Plain_VAE_Linear')
+print('The net\'s parameters are saved')
 
 if z_dim == 2:
     batch_size_test = 500
@@ -176,10 +199,25 @@ if z_dim == 2:
 
     z = np.concatenate(z_list, axis=0)
     label = np.concatenate(label_list)
-    sns.kdeplot(z[:, 0], z[:, 1], n_levels=30, cmap='Purples_d')
-    plt.show()
-    plt.scatter(z[:, 0], z[:, 1], c=label)
+
+    frame1 = sns.kdeplot(z[:, 0], z[:, 1], n_levels=300, cmap='hot')
+    frame1.axes.get_xaxis().set_visible(False)
+    frame1.axes.get_yaxis().set_visible(False)
+    plt.savefig('Latent_Distirbutions.eps', format='eps', dpi=1000)
     plt.show()
 
-torch.save(VAE.state_dict(), './Saved_Networks/Plain_VAE_Linear')
-print('The net\'s parameters are saved')
+    frame2 = plt.scatter(z[:, 0], z[:, 1], c=label, cmap='jet', edgecolors='black')
+    frame2.axes.get_xaxis().set_visible(False)
+    frame2.axes.get_yaxis().set_visible(False)
+    plt.colorbar()
+    plt.savefig('Latent_Distirbutions_Labels.eps', format='eps', dpi=1000)
+    plt.show()
+
+
+samples = VAE(x_test[:100], no_enc=True)
+samples = samples.permute(0, 2, 3, 1).contiguous().cpu().data.numpy()
+frame3 = plt.imshow(convert_to_display(samples), cmap='Greys_r')
+frame3.axes.get_xaxis().set_visible(False)
+frame3.axes.get_yaxis().set_visible(False)
+plt.savefig('Recon_Images.eps', format='eps', dpi=1000)
+plt.show()
