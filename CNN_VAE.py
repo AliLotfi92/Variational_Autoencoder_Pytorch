@@ -19,6 +19,11 @@ import torch.nn.init as init
 import matplotlib.pyplot as plt
 
 
+# Calling Seaborn causes pytorch warnings to be repeated in each loop, so I turned off these redudant warnings, but make sure
+# you do not miss something important.
+
+warnings.filterwarnings('ignore')
+
 
 class CNNVAE1(nn.Module):
 
@@ -159,7 +164,6 @@ for epoch in range(max_iter):
 
         samples = VAE(x_true, no_enc=True)
         samples = samples.permute(0, 2, 3, 1).contiguous().cpu().data.numpy()
-        #x_recon = x_recon.permute(0, 2, 3, 1).contiguous().cpu().data.numpy()
         plt.imshow(convert_to_display(samples), cmap='Greys_r')
         plt.show()
 
