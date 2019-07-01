@@ -1,6 +1,6 @@
 
 
-# Variational Autoencoder with fully connnected layers, 
+# Variational Autoencoder with fully connnected layers,
 
 # Please email me if you have any comments or questions: alotfi@utexas.edu
 
@@ -142,7 +142,7 @@ for epoch in range(max_iter):
 
     train_loss = 0
     KL_loss = 0
-    Loglikehood_loss= 0
+    Loglikelihood_loss= 0
 
     for batch_idx, (x_true, _) in enumerate(data_loader):
         x_true = x_true.to(device)
@@ -153,7 +153,7 @@ for epoch in range(max_iter):
         loss = vae_recon_loss + KL
 
         train_loss += loss.item()
-        Loglikehood_loss += vae_recon_loss.item()
+        Loglikelihood_loss += vae_recon_loss.item()
         KL_loss += KL.item()
 
 
@@ -170,12 +170,12 @@ for epoch in range(max_iter):
                                                                               KL))
 
     print('====> Epoch: {}, \t Average loss: {:.4f}, \t Log Likeihood: {:.4f}, \t KL: {:.4f} '
-          .format(epoch, train_loss / (batch_idx + 1), Loglikehood_loss/ (batch_idx + 1), KL_loss/ (batch_idx + 1)))
+          .format(epoch, train_loss / (batch_idx + 1), Loglikelihood_loss/ (batch_idx + 1), KL_loss/ (batch_idx + 1)))
 
 
     Result.append(('====>epoch:', epoch,
                    'loss:', train_loss / (batch_idx + 1),
-                   'Loglikeihood:', Loglikehood_loss / (batch_idx + 1),
+                   'Loglikeihood:', Loglikelihood_loss / (batch_idx + 1),
                    'KL:', KL_loss / (batch_idx + 1),
                    ))
 
