@@ -120,7 +120,6 @@ z_dim = 2
 lr = 0.001
 beta1 = 0.9
 beta2 = 0.999
-gamma = 1
 
 training_set = datasets.MNIST('./tmp/MNIST', train=True, download=True, transform=transforms.ToTensor())
 data_loader = DataLoader(training_set, batch_size=batch_size, shuffle=True)
