@@ -178,10 +178,10 @@ for epoch in range(max_iter):
                    'Loglikeihood:', Loglikelihood_loss / (batch_idx + 1),
                    'KL:', KL_loss / (batch_idx + 1),
                    ))
-
-    with open("file.txt", "w") as output:
-        output.write(str(Result))
-
+    
+    
+with open("file.txt", "w") as output:
+    output.write(str(Result))
 
 torch.save(VAE.state_dict(), './Saved_Networks/Plain_VAE_Linear')
 print('The net\'s parameters are saved')
